@@ -51,6 +51,10 @@ svg#icon-top {
     left: 25px;
 }
 
+svg#icon-theme {
+    right: 25px;
+}
+
 /* MAIN */
 main {
     display: flex;
