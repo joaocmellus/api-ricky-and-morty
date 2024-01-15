@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
     <header>
@@ -27,11 +26,56 @@
         
         <section id="pagination">
             <button class="previous-page"></button>
-            <nav class="navigation"></nav>
+            <div class="navigation"></div>
             <button class="next-page"></button>
         </section>
 
-        <section id="characters"></section>
+        <section id="characters">
+            <div class="card">
+                <div class="card-image">
+                    <img src="https://rickandmortyapi.com/api/character/avatar/1.jpeg" alt="${character.name}"> <!-- imagem do personagem-->
+                </div>
+                <div class="card-content">
+                    <div class="content-box">
+                        <h2 class="card-title">Título do card</h2>
+                        <div class="status">
+                            <div class="indicator alive"></div> <!-- Alterar se o personagem está vivo ou morto -->
+                            <p>Vivo - Humano</p> <!-- Status - Raça -->
+                        </div>
+                    </div>
+                    <div class="content-box">
+                        <h3>Última localização conhecida:</h3>
+                    <p>Planeta XPTO</p>
+                    </div>
+                    <div class="content-box">
+                        <h3>Visto a última vez em:</h3>
+                        <p>Nome do capítulo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-image">
+                    <img src="https://rickandmortyapi.com/api/character/avatar/1.jpeg" alt="${character.name}"> <!-- imagem do personagem-->
+                </div>
+                <div class="card-content">
+                    <div class="content-box">
+                        <h2 class="card-title">Título do card</h2>
+                        <div class="status">
+                            <div class="indicator dead"></div> <!-- Alterar se o personagem está vivo ou morto -->
+                            <p>Vivo - Humano</p> <!-- Status - Raça -->
+                        </div>
+                    </div>
+                    <div class="content-box">
+                        <h3>Última localização conhecida:</h3>
+                    <p>Planeta XPTO</p>
+                    </div>
+                    <div class="content-box">
+                        <h3>Visto a última vez em:</h3>
+                        <p>Nome do capítulo</p>
+                    </div>
+                </div>
+            </div>
+        </section>
         <div class="img-container">
             <img src="./assets/img/rick-and-morty-portal.png" alt="Imagem dos protagonistas Rick e Morty saindo de um portal verde">
         </div>
