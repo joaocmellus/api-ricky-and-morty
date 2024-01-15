@@ -183,6 +183,10 @@ form {
     background-color: #5BCF48;
 }
 
+.indicator.unknown {
+    background-color: #7a7a7a;
+}
+
 .card-image {
     display: flex;
     justify-content: center;
