@@ -99,16 +99,132 @@ async function formatLastEpisode(episodeURL) {
     return `${data.name} - ${data.episode}`;
 }
 
+function renderRadio(id) {
+    return `
+    <label for="page-${id}" class="box">
+        <label class="custom-radio" role="radio">
+            <input type="radio" id="page-${id}" name="page" value="${id}" class="page-input" ${id == pagination.currentIndex ? 'checked' : ''}>
+            <span tabindex="0" class="selector"></span>
+        </label>
+        <a class="page-link" href="?page=${id}">${id}</a>
+    </label>`;
+}
+
+// Paginação
+const pagination = {};
+
+function setupPagination(currentIndex, length, maxOptions) {
+    pagination.ref = document.querySelector('#pagination');
+    pagination.navigation = pagination.ref.querySelector('.navigation');
+    pagination.length = length;
+    pagination.currentIndex = currentIndex;
+    pagination.nextPage = pagination.ref.querySelector('.next-page').addEventListener('click', () =>  nextPage());
+    pagination.previousPage =  pagination.ref.querySelector('.previous-page').addEventListener('click', () => previousPage());
+    pagination.navigation.addEventListener('change', (e) => changePage(e.target.value));
+    pagination.maxOptions = maxOptions;
+
+    updatePagination();
+}
+
+function nextPage(index = null) {
+    if (!index) {
+        index = pagination.currentIndex + 1;
+    }
+    pagination.currentIndex = index % pagination.length;
+    updatePage();
+}
+
+function previousPage(index = null) {
+    if (!index) {
+        index = pagination.currentIndex - 1;
+    }
+    pagination.currentIndex = (pagination.length + index) % pagination.length;
+    updatePage();
+}
+
+async function updatePagination() {
+    for (let i = 1; i <= pagination.length; i++) {
+        pagination.navigation.innerHTML += renderRadio(i);
+    }
+
+    pagination.navigation.querySelectorAll('.selector').forEach(selector => {
+        selector.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const input = e.target.parentNode.querySelector('input');
+                input.checked = input.checked ? false : true;
+                changePage(input.value);
+            }
+        })
+    });
+}
+
+function changePage(value) {
+    if (value > pagination.currentIndex) {
+        nextPage(value);
+        return;
+    }
+    if (value < pagination.currentIndex) {
+        previousPage(value);
+        return;
+    }
+}
+
 // Ações
 async function updateCharacters(search=null, page=null) {
     const characters = await getCharacters(search, page);
     if (!characters) {
         return null;
     }
-    console.log(characters)
-        
+
     const charactersDiv = document.querySelector('#characters');
     charactersDiv.innerHTML = await renderCharacters(characters.results);
 }
 
-updateCharacters();
+function updatePage() {
+    updateCharacters();
+}
+
+async function getAPIInfo() {
+    api.episodes.get().then((result) => {
+        document.querySelector('#episode-count').innerText = result.data.info.count;
+    }).catch((err) => {
+        console.error('Erro ao configurar informação número de episódios no footer:', err);
+    });
+
+    api.locations.get().then((result) => {
+        document.querySelector('#location-count').innerText = result.data.info.count;
+    }).catch((err) => {
+        console.error('Erro ao configurar informação número de localizações no footer:', err);
+    });
+
+    const characterInfo = await api.characters.get().then(result => {
+        document.querySelector('#character-count').innerText = result.data.info.count;
+        return result.data.info;
+    }).catch((err) => {
+        console.error('Erro ao configurar informação número de personagens no footer:', err);
+        }
+    );
+
+    return {
+        pageCount: characterInfo.pages
+    };
+}
+
+async function getURLInfo() {
+    const searchParams = new URLSearchParams(window.location.search);
+
+    return {
+        page: searchParams.get('page') ?? 1,
+        search: searchParams.get('search') ?? ''
+    }
+}
+
+async function setupPage() {
+    const apiInfo = await getAPIInfo();
+    const URLInfo = await getURLInfo();
+
+    setupPagination(URLInfo.page, apiInfo.pageCount, 10);
+    updateCharacters(URLInfo.search, URLInfo.page);
+}
+
+setupPage();

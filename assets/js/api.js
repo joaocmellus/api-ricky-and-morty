@@ -5,4 +5,7 @@ const api = {
     episodes: axios.create({
         baseURL: 'https://rickandmortyapi.com/api/episode',
     }),
+    locations: axios.create({
+        baseURL: 'https://rickandmortyapi.com/api/location',
+    })
 };

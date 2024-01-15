@@ -2,6 +2,7 @@
     --title-color: #105718;
     --primary-font-color: #252525;
     --secondary-font-color: #A5A5A5;
+    --border-color: #ccc;
 
     --footer-bg-color: #1F2821;
     --footer-font-color: #7c7c7c;
@@ -55,6 +56,123 @@ svg#icon-theme {
     right: 25px;
 }
 
+/* PAGINAÇÃO */ 
+#pagination {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    gap: 1em;
+}
+
+#pagination .navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    min-width: 100px;
+    gap: 0.25em;
+    margin-top: .7em;
+}
+
+#pagination .navigation > .box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2em;
+    height: 2em;
+    border: none;
+    background-color: var(--border-color);
+}
+
+.arrow svg {
+    height: 50%;
+    width: 50%;
+    fill: var(--primary-font-color);
+}
+
+.page-link {
+    text-decoration: none;
+    color: var(--title-color);
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 1.3em;
+    width:  1.3em;
+    box-sizing: border-box;
+    border: 1px var(--border-color) solid;
+    border-radius: 100%;
+}
+
+.selector::after {
+    content: '';
+    display: block;
+    height: 70%;
+    width: 70%;
+
+    background-color: transparent;
+}
+
+.selector:is(:focus, :focus-visible,) {
+    border-color: var(--primary-font-color);
+}
+
+.custom-radio {
+    display: flex;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.page-input {
+    display: none;
+}
+
+.page-input:checked + .selector::after {
+    background-color: var(--title-color);
+}
+.arrow,
+.custom-radio,
+.custom-radio::after,
+.selector::after {
+    cursor: pointer;
+    border-radius: 100%;
+}
+
+.arrow:hover,
+.custom-radio:hover::after {
+    opacity: 0.8;
+}
+
+.custom-radio::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: transparent;
+}
+
+.checkbox-input:checked + :is(.custom-radio)::after {
+    background-color: white;
+}
+
 /* MAIN */
 main {
     display: flex;
@@ -67,13 +185,13 @@ main {
 }
 
 /* BARRA DE PESQUISA */
-form {
+form#search-form {
     display: flex;
     justify-content: center;
     width: 100%;
 }
 
-.search-control {
+form#search-form .search-control {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -83,20 +201,20 @@ form {
     padding: 0.5em 20px;
     margin: 0 16px;
     
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1.25em;
 
     cursor: text;
 }
 
-.search-control input {
+form#search-form .search-control input {
     outline: none;
     border: none;
     flex: 1 1 350px;
 }
 
-.search-control input::placeholder {
+form#search-form .search-control input::placeholder {
     color: var(--secondary-font-color);
     font-weight: 500;
 }
