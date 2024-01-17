@@ -35,35 +35,6 @@ async function getEpisode(id) {
 }
 
 // Renderização do Layout
-async function renderCard(character) {
-    const status = character.status == 'Dead' ? 'Morto' : character.status == 'Alive' ? 'Vivo' : 'Desconhecido';
-    const lastEpisode = await formatLastEpisode(character.episode.slice(-1)[0]);
-
-    return `
-    <div class="card" data-id="${character.id}">
-        <div class="card-image">
-            <img src="${character.image}" alt="Imagem do personagem: ${character.name}">
-        </div>
-        <div class="card-content">
-            <div class="content-box">
-                <h2 class="card-title">${character.name}</h2>
-                <div class="status">
-                    <div class="indicator ${character.status.toLowerCase()}"></div>
-                    <p>${status} - ${character.species}</p>
-                </div>
-            </div>
-            <div class="content-box">
-                <h3>Última localização conhecida:</h3>
-            <p>${character.location.name}</p>
-            </div>
-            <div class="content-box">
-                <h3>Visto a última vez em:</h3>
-                <p>${lastEpisode}</p>
-            </div>
-        </div>
-    </div>`
-}
-
 async function renderCharacters(characters) {
     if (!Array.isArray(characters)) {
         console.error('Não array passado como argumento.');
@@ -99,11 +70,40 @@ async function formatLastEpisode(episodeURL) {
     return `${data.name} - ${data.episode}`;
 }
 
+async function renderCard(character) {
+    const status = character.status == 'Dead' ? 'Morto' : character.status == 'Alive' ? 'Vivo' : 'Desconhecido';
+    const lastEpisode = await formatLastEpisode(character.episode.slice(-1)[0]);
+
+    return `
+    <div class="card" data-id="${character.id}">
+        <div class="card-image">
+            <img src="${character.image}" alt="Imagem do personagem: ${character.name}">
+        </div>
+        <div class="card-content">
+            <div class="content-box">
+                <h2 class="card-title">${character.name}</h2>
+                <div class="status">
+                    <div class="indicator ${character.status.toLowerCase()}"></div>
+                    <p>${status} - ${character.species}</p>
+                </div>
+            </div>
+            <div class="content-box">
+                <h3>Última localização conhecida:</h3>
+            <p>${character.location.name}</p>
+            </div>
+            <div class="content-box">
+                <h3>Visto a última vez em:</h3>
+                <p>${lastEpisode}</p>
+            </div>
+        </div>
+    </div>`
+}
+
 function renderRadio(id) {
     return `
     <label for="page-${id}" class="box">
         <label class="custom-radio" role="radio">
-            <input type="radio" id="page-${id}" name="page" value="${id}" class="page-input" ${id == pagination.currentIndex ? 'checked' : ''}>
+            <input type="radio" id="page-${id}" name="page" value="${id-1}" class="page-input" ${id-1 == pagination.currentIndex ? 'checked' : ''}>
             <span tabindex="0" class="selector"></span>
         </label>
         <a class="page-link" href="?page=${id}">${id}</a>
@@ -112,16 +112,20 @@ function renderRadio(id) {
 
 // Paginação
 const pagination = {};
-
 function setupPagination(currentIndex, length, maxOptions) {
     pagination.ref = document.querySelector('#pagination');
-    pagination.navigation = pagination.ref.querySelector('.navigation');
     pagination.length = length;
-    pagination.currentIndex = currentIndex;
-    pagination.nextPage = pagination.ref.querySelector('.next-page').addEventListener('click', () =>  nextPage());
-    pagination.previousPage =  pagination.ref.querySelector('.previous-page').addEventListener('click', () => previousPage());
-    pagination.navigation.addEventListener('change', (e) => changePage(e.target.value));
     pagination.maxOptions = maxOptions;
+    pagination.currentIndex = currentIndex-1;
+
+    pagination.navigation = pagination.ref.querySelector('.navigation');
+    pagination.navigation.addEventListener('change', (e) => changePage(e.target.value));
+    
+    pagination.nextPage = pagination.ref.querySelector('.next-page');
+    pagination.nextPage.addEventListener('click', () => nextPage());
+    
+    pagination.previousPage = pagination.ref.querySelector('.previous-page');
+    pagination.previousPage.addEventListener('click', () => previousPage());
 
     updatePagination();
 }
@@ -142,7 +146,35 @@ function previousPage(index = null) {
     updatePage();
 }
 
+function changePage(value) {
+    if (value > pagination.currentIndex) {
+        nextPage(value);
+        return;
+    }
+    if (value < pagination.currentIndex) {
+        previousPage(value);
+        return;
+    }
+}
+
+// Ações
+async function updateCharacters(search = null, page = null) {
+    const characters = await getCharacters(search, page);
+    const charactersDiv = document.querySelector('#characters');
+    
+    if (characters) {
+        charactersDiv.innerHTML = await renderCharacters(characters.results);
+        pagination.length = characters.info.pages;
+    } else {
+        charactersDiv.innerHTML = '';
+        pagination.length = 0;
+    }
+    updatePagination();
+}
+
 async function updatePagination() {
+    pagination.navigation.innerHTML = '';
+
     for (let i = 1; i <= pagination.length; i++) {
         pagination.navigation.innerHTML += renderRadio(i);
     }
@@ -158,30 +190,15 @@ async function updatePagination() {
     });
 }
 
-function changePage(value) {
-    if (value > pagination.currentIndex) {
-        nextPage(value);
-        return;
+async function updatePage(search=null, resetPage=false) {
+    if (resetPage) {
+        pagination.currentIndex = 0;
     }
-    if (value < pagination.currentIndex) {
-        previousPage(value);
-        return;
+    await updateCharacters(search, pagination.currentIndex + 1);
+
+    if (pagination.length > 0) {
+        pagination.navigation.querySelector(`input[value="${pagination.currentIndex}"]`).checked = true;
     }
-}
-
-// Ações
-async function updateCharacters(search=null, page=null) {
-    const characters = await getCharacters(search, page);
-    if (!characters) {
-        return null;
-    }
-
-    const charactersDiv = document.querySelector('#characters');
-    charactersDiv.innerHTML = await renderCharacters(characters.results);
-}
-
-function updatePage() {
-    updateCharacters();
 }
 
 async function getAPIInfo() {
@@ -223,8 +240,14 @@ async function setupPage() {
     const apiInfo = await getAPIInfo();
     const URLInfo = await getURLInfo();
 
+    document.querySelector('#searchChar').value = URLInfo.search;
     setupPagination(URLInfo.page, apiInfo.pageCount, 10);
     updateCharacters(URLInfo.search, URLInfo.page);
 }
+
+// Triggers
+document.querySelector('#searchChar').addEventListener('input', (e) => {
+    updatePage(e.target.value, true);
+});
 
 setupPage();
