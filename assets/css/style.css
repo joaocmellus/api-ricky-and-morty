@@ -72,9 +72,10 @@ svg#icon-theme {
     min-width: 100px;
     gap: 0.25em;
     margin-top: .7em;
+    list-style: none;
 }
 
-#pagination .navigation > .box {
+#pagination .navigation .box {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -236,11 +237,13 @@ form#search-form .search-control input::placeholder {
 #characters {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 100px;
-    width: 100%;
-    max-width: 1200px;
-    justify-content: space-evenly;
-    gap: 100px 0;
+    margin: 100px 0 20px;
+    padding: 0 100px;
+    width: 1200px;
+    max-width: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+    gap: 50px 0;
 }
 
 /* CARD STYLE */
@@ -251,7 +254,8 @@ form#search-form .search-control input::placeholder {
     border-radius: 10px;
     overflow: hidden;
     padding-right: 1.5em;
-    height: 200px;
+    min-height: 200px;
+    max-width: 425px;
 
     box-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
     -moz-box-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
@@ -262,6 +266,8 @@ form#search-form .search-control input::placeholder {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    box-sizing: border-box;
+    padding: 10px 0;
     gap: 20px;
 
     font-size: .95em;
@@ -310,7 +316,9 @@ form#search-form .search-control input::placeholder {
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    height: 100%;
+    min-height: 100%;
+    height: 200px;
+    max-width: 200px;
     width: auto;
     overflow: hidden;
     border-radius: 10px 0 0 10px;
@@ -319,6 +327,12 @@ form#search-form .search-control input::placeholder {
 .card-image img {
     height: 100%;
     object-fit: cover;
+}
+
+.divisor {
+    width: 100%;
+    height: 1px;
+    background-color: #5BCF48;
 }
 
 /* FOOTER */
@@ -351,6 +365,10 @@ footer small {
     font-size: 1em;
 }
 
+footer > small {
+    margin: 0 20px;
+}
+
 .img-container {
     width: 350px;
     max-width: 95%;
@@ -364,9 +382,15 @@ footer small {
     height: 100%;
 }
 
-@media screen and (max-width: 1000px) {    
+@media screen and (max-width: 1150px) {
+    h1 {
+        font-size: 3em;
+    }
+
     #characters {
-        margin-top: 50px;
+        margin-top: 70px;
+        padding: unset;
+        justify-content: space-evenly;
     }
 
     .card {
@@ -380,10 +404,41 @@ footer small {
         flex-grow: 1;
         flex-shrink: 0;
     }
-        
+    
+    .divisor {
+        display: none;
+    }
 }
-@media screen and (max-width: 576px) {    
+@media screen and (max-width: 576px) {   
     .card {
+        min-height: 180px;
+    }
+
+    .card-image {
+        flex-shrink: 0;
+        width: 180px;
+        min-width: 60px;
+        max-width: 33%;
         height: 180px;
+    }
+
+    .card-content {
+        flex-shrink: 1;
+    }
+
+    .informations small {
+        width: 100%;
+        padding: 1em 0;
+    }
+
+    footer {
+        gap: 100px;
+        padding: 3em 0 2.5em;
+    }
+}
+
+@media screen and (max-width: 320px) {   
+    h1 {
+        font-size: 2.4em;
     }
 }

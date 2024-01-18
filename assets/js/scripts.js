@@ -101,20 +101,24 @@ async function renderCard(character) {
 
 function renderRadio(id) {
     return `
-    <label for="page-${id}" class="box">
-        <label class="custom-radio" role="radio">
-            <input type="radio" id="page-${id}" name="page" value="${id-1}" class="page-input" ${id-1 == pagination.currentIndex ? 'checked' : ''}>
-            <span tabindex="0" class="selector"></span>
-        </label>
-        <a class="page-link" href="?page=${id}">${id}</a>
-    </label>`;
+    <li data-id="${id}">
+        <div class="box"">
+            <label class="custom-radio" role="radio">
+                <input type="radio" name="page" value="${id-1}" class="page-input" ${id-1 == pagination.currentIndex ? 'checked' : ''}>
+                <span tabindex="0" class="selector"></span>
+            </label>
+            <a class="page-link" data-id="${id}" href="${renderURLQueryParams(id)}">${id}</a>
+        </div>
+    </li>`;
 }
 
 // Paginação
 const pagination = {};
-function setupPagination(currentIndex, length, maxOptions) {
+const searchInput = document.querySelector('#searchChar');
+
+function setupPagination(currentIndex, maxOptions) {
     pagination.ref = document.querySelector('#pagination');
-    pagination.length = length;
+    pagination.length = null;
     pagination.maxOptions = maxOptions;
     pagination.currentIndex = currentIndex-1;
 
@@ -131,7 +135,7 @@ function setupPagination(currentIndex, length, maxOptions) {
 }
 
 function nextPage(index = null) {
-    if (!index) {
+    if (index == null) {
         index = pagination.currentIndex + 1;
     }
     pagination.currentIndex = index % pagination.length;
@@ -139,7 +143,7 @@ function nextPage(index = null) {
 }
 
 function previousPage(index = null) {
-    if (!index) {
+    if (index == null) {
         index = pagination.currentIndex - 1;
     }
     pagination.currentIndex = (pagination.length + index) % pagination.length;
@@ -158,7 +162,10 @@ function changePage(value) {
 }
 
 // Ações
-async function updateCharacters(search = null, page = null) {
+async function updateCharacters(search = null, page = null, searchSubmit=false) {
+    updateURL(search, page, searchSubmit);
+    document.body.scrollIntoView();
+    
     const characters = await getCharacters(search, page);
     const charactersDiv = document.querySelector('#characters');
     
@@ -169,6 +176,7 @@ async function updateCharacters(search = null, page = null) {
         charactersDiv.innerHTML = '';
         pagination.length = 0;
     }
+
     updatePagination();
 }
 
@@ -188,20 +196,56 @@ async function updatePagination() {
             }
         })
     });
+    
+    pagination.navigation.querySelectorAll('.page-link').forEach( link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+
+            if (e.target.dataset.id - 1 != pagination.currentIndex) {
+                e.target.parentNode.querySelector('input').checked = true;
+                changePage(e.target.dataset.id - 1);
+            }
+        })
+    });
 }
 
-async function updatePage(search=null, resetPage=false) {
+async function updatePage(search=null, resetPage=false, searchSubmit=false) {
     if (resetPage) {
         pagination.currentIndex = 0;
     }
-    await updateCharacters(search, pagination.currentIndex + 1);
+
+    if (!search) {
+        search = searchInput.value;
+    }
+
+    await updateCharacters(search, pagination.currentIndex + 1, searchSubmit);
 
     if (pagination.length > 0) {
         pagination.navigation.querySelector(`input[value="${pagination.currentIndex}"]`).checked = true;
     }
 }
 
-async function getAPIInfo() {
+function renderURLQueryParams(page, search = null) {
+    if (!page) return null;
+    if (!search) search = searchInput.value;
+
+    return `${window.location.pathname}?${search ? `search=${encodeURIComponent(search)}&` : ''}page=${encodeURIComponent(page)}`
+}
+
+async function updateURL(search = null, page = null, searchSubmit=false) {
+    const searchParams = await getURLInfo();
+
+    if (search) searchParams.search = search;
+    if (page) searchParams.page = page;
+
+    const newURL = renderURLQueryParams(page, search);
+    if (searchSubmit) {
+        window.history.pushState({ path: newURL }, '', newURL);
+    }
+    window.history.replaceState({ path: newURL }, '', newURL);
+}
+
+async function setAPIInfo() {
     api.episodes.get().then((result) => {
         document.querySelector('#episode-count').innerText = result.data.info.count;
     }).catch((err) => {
@@ -214,17 +258,12 @@ async function getAPIInfo() {
         console.error('Erro ao configurar informação número de localizações no footer:', err);
     });
 
-    const characterInfo = await api.characters.get().then(result => {
+    api.characters.get().then((result) => {
         document.querySelector('#character-count').innerText = result.data.info.count;
-        return result.data.info;
     }).catch((err) => {
         console.error('Erro ao configurar informação número de personagens no footer:', err);
         }
     );
-
-    return {
-        pageCount: characterInfo.pages
-    };
 }
 
 async function getURLInfo() {
@@ -237,17 +276,23 @@ async function getURLInfo() {
 }
 
 async function setupPage() {
-    const apiInfo = await getAPIInfo();
+    setAPIInfo();
     const URLInfo = await getURLInfo();
 
-    document.querySelector('#searchChar').value = URLInfo.search;
-    setupPagination(URLInfo.page, apiInfo.pageCount, 10);
+    searchInput.value = URLInfo.search;
+    setupPagination(URLInfo.page, 10);
     updateCharacters(URLInfo.search, URLInfo.page);
 }
 
 // Triggers
-document.querySelector('#searchChar').addEventListener('input', (e) => {
+searchInput.addEventListener('input', (e) => {
     updatePage(e.target.value, true);
+});
+
+searchInput.form.addEventListener('submit', e => {
+    e.preventDefault();
+    
+    updatePage(e.target.value, true, true);    
 });
 
 setupPage();
