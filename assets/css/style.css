@@ -92,9 +92,15 @@ h1 {
     align-items: center;
     flex-wrap: wrap;
     min-width: 100px;
-    gap: 0.25em;
+    gap: 0.4em;
     margin-top: .7em;
     list-style: none;
+}
+
+#pagination .navigation .ellipsis {
+    position: relative;
+    top: -5px;
+    margin: 0 2px;
 }
 
 #pagination .navigation .box {
