@@ -1,14 +1,3 @@
-:root {
-    --title-color: #105718;
-    --primary-font-color: #252525;
-    --secondary-font-color: #A5A5A5;
-    --border-color: #ccc;
-
-    --footer-bg-color: #1F2821;
-    --footer-font-color: #7c7c7c;
-    --footer-strong-font-color: white;
-}
-
 * {
     padding: 0;
     margin: 0;
@@ -23,6 +12,33 @@ body {
     flex-direction: column;
     color: var(--primary-font-color);
     font-family: 'Maven Pro', sans-serif;
+    background-color: var(--bg-color);
+}
+
+body.light-theme {
+    --title-color: #105718;
+    --primary-font-color: #252525;
+    --secondary-font-color: #A5A5A5;
+    --border-color: #ccc;
+    --bg-color: white;
+    --card-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
+
+    --footer-bg-color: #1F2821;
+    --footer-font-color: #7c7c7c;
+    --footer-strong-font-color: white;
+}
+
+body.dark-theme {
+    --title-color: #0bc921;
+    --primary-font-color: #ffffff;
+    --secondary-font-color: #A5A5A5;
+    --border-color: #ccc;
+    --bg-color: #1a1a1a;
+    --card-shadow: 0px 2px 10px -5px rgba(0,0,0,1);
+
+    --footer-bg-color: #073010;
+    --footer-font-color: #c5c5c5;
+    --footer-strong-font-color: white;
 }
 
 /* Header */
@@ -42,18 +58,24 @@ h1 {
 }
 
 /* ICONES */
-header svg {
+.header-icon {
     position: absolute;
     top: 10px;
     fill: var(--primary-font-color);
 }
 
-svg#icon-top {
+#icon-top {
     left: 25px;
 }
 
-svg#icon-theme {
+#icon-theme {
     right: 25px;
+
+    display: flex;
+    border: none;
+    border-radius: 100px;
+    background: transparent;
+    cursor: pointer;
 }
 
 /* PAGINAÇÃO */ 
@@ -170,10 +192,6 @@ svg#icon-theme {
     background-color: transparent;
 }
 
-.checkbox-input:checked + :is(.custom-radio)::after {
-    background-color: white;
-}
-
 /* MAIN */
 main {
     display: flex;
@@ -210,8 +228,10 @@ form#search-form .search-control {
 }
 
 form#search-form .search-control input {
+    color: var(--primary-font-color);
     outline: none;
     border: none;
+    background: transparent;
     flex: 1 1 350px;
 }
 
@@ -257,9 +277,9 @@ form#search-form .search-control input::placeholder {
     min-height: 200px;
     max-width: 425px;
 
-    box-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
-    -moz-box-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
-    -webkit-box-shadow: 0px 2px 10px -5px rgba(0,0,0,0.3);
+    box-shadow: var(--card-shadow);
+    -moz-box-shadow: var(--card-shadow);
+    -webkit-box-shadow: var(--card-shadow);
 }
 
 .card-content {

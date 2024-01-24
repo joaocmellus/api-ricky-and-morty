@@ -275,6 +275,17 @@ async function getURLInfo() {
     }
 }
 
+async function setThemeMode() {
+    // Verifica se o usuário prefere dark mode
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (prefersDarkMode) {
+        document.body.classList.add('dark-theme');
+    } else {
+        document.body.classList.add('light-theme');
+    }
+}
+
 async function setupPage() {
     setAPIInfo();
     const URLInfo = await getURLInfo();
@@ -282,6 +293,8 @@ async function setupPage() {
     searchInput.value = URLInfo.search;
     setupPagination(URLInfo.page, 10);
     updateCharacters(URLInfo.search, URLInfo.page);
+
+    setThemeMode();
 }
 
 // Triggers
@@ -293,6 +306,11 @@ searchInput.form.addEventListener('submit', e => {
     e.preventDefault();
     
     updatePage(e.target.value, true, true);    
+});
+
+document.querySelector('#icon-theme').addEventListener('click', (e) => {
+    document.body.classList.toggle('dark-theme')
+    document.body.classList.toggle('light-theme')
 });
 
 setupPage();
