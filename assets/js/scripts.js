@@ -130,8 +130,6 @@ function setupPagination(currentIndex, maxOptions) {
     
     pagination.previousPage = pagination.ref.querySelector('.previous-page');
     pagination.previousPage.addEventListener('click', () => previousPage());
-
-    updatePagination();
 }
 
 function nextPage(index = null) {
@@ -182,9 +180,51 @@ async function updateCharacters(search = null, page = null, searchSubmit=false) 
 
 async function updatePagination() {
     pagination.navigation.innerHTML = '';
+    
+    const hideOptions = pagination.length > pagination.maxOptions;
+    const maxOptions = hideOptions ? pagination.maxOptions : pagination.length;
 
-    for (let i = 1; i <= pagination.length; i++) {
-        pagination.navigation.innerHTML += renderRadio(i);
+    // Definir valor inicial da iteração
+    let initialValue = 1;         // Definir em qual página começa a iteração da paginação.
+    let isInitialRange = false; // Definir se ele está na faixa dos itens iniciais.
+    let isFinalRange = false;   // Definir se ele está na faixa dos itens finais.
+
+    if (hideOptions) {
+        // Definir faixas de opções
+        const initialMaxRange = pagination.length - pagination.maxOptions + 2;
+        const finalMinRange = pagination.maxOptions - 1;
+        
+        const currentIndex = pagination.currentIndex + 1;        
+        
+        if (currentIndex <= finalMinRange) {
+            initialValue = 1;
+            isInitialRange = true;
+            
+        } else if (currentIndex >= initialMaxRange) {
+            initialValue = initialMaxRange-1;
+            isFinalRange = true;
+
+        } else {
+            initialValue = currentIndex- Math.floor(pagination.maxOptions / 2);
+        }
+    }
+    const finalValue = initialValue + maxOptions;
+    for (let i = initialValue; i < finalValue; i++) {
+        if (hideOptions && i == initialValue) {
+            pagination.navigation.innerHTML += renderRadio(1);
+            if (!isInitialRange) {
+                pagination.navigation.innerHTML += '<span class="ellipsis">...</span>'
+            }
+        }
+        else if (hideOptions && i == finalValue - 1) {
+            if (!isFinalRange) {
+                pagination.navigation.innerHTML += '<span class="ellipsis">...</span>'
+            }
+            pagination.navigation.innerHTML += renderRadio(pagination.length);
+        }
+        else {
+            pagination.navigation.innerHTML += renderRadio(i);
+        }
     }
 
     pagination.navigation.querySelectorAll('.selector').forEach(selector => {
@@ -275,13 +315,23 @@ async function getURLInfo() {
     }
 }
 
+async function setThemeMode() {
+    // Verifica se o usuário prefere dark mode
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (prefersDarkMode) {
+        document.body.classList.replace('light-theme','dark-theme');
+    }
+}
+
 async function setupPage() {
     setAPIInfo();
+    setThemeMode();
     const URLInfo = await getURLInfo();
 
     searchInput.value = URLInfo.search;
     setupPagination(URLInfo.page, 10);
-    updateCharacters(URLInfo.search, URLInfo.page);
+    updateCharacters(URLInfo.search, URLInfo.page);    
 }
 
 // Triggers
@@ -293,6 +343,11 @@ searchInput.form.addEventListener('submit', e => {
     e.preventDefault();
     
     updatePage(e.target.value, true, true);    
+});
+
+document.querySelector('#icon-theme').addEventListener('click', (e) => {
+    document.body.classList.toggle('dark-theme')
+    document.body.classList.toggle('light-theme')
 });
 
 setupPage();
