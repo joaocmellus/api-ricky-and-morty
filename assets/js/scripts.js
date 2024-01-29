@@ -1,4 +1,12 @@
-// Consumo da API de Rick and Morty
+/**
+ * Realiza uma chamada assíncrona para a api de Rick and Morty para receber informações sobre personagens.
+ * 
+ * @param {string|null} [search=null] - Texto opcional para fazer uma consulta específica à API.
+ * @param {number|null} [page=null]   - Número da paginação da consulta.
+ * 
+ * @returns {array|null}              Em caso de sucesso retorna um array de objetos com os dados dos personagens. 
+ *                                    Caso contrário, retorna null.
+ */
 async function getCharacters(search = null, page=null) {
     try {
         const queryParams = {
@@ -35,6 +43,13 @@ async function getEpisode(id) {
 }
 
 // Renderização do Layout
+/**
+ * Recebe um array de objetos e retorna os dados formatados no padrão do projeto.
+ * 
+ * @param {array} characters    - Lista de personagens.
+ * 
+ * @returns {string}            String do HTML.
+ */
 async function renderCharacters(characters) {
     if (!Array.isArray(characters)) {
         console.error('Não array passado como argumento.');
@@ -70,6 +85,13 @@ async function formatLastEpisode(episodeURL) {
     return `${data.name} - ${data.episode}`;
 }
 
+/**
+ * Recebe o objeto de dados de um personagem e retorna o card renderizado com os dados.
+ * 
+ * @param {object} character
+ * 
+ * @returns {string}
+ */
 async function renderCard(character) {
     const status = character.status == 'Dead' ? 'Morto' : character.status == 'Alive' ? 'Vivo' : 'Desconhecido';
     const lastEpisode = await formatLastEpisode(character.episode.slice(-1)[0]);
@@ -99,6 +121,13 @@ async function renderCard(character) {
     </div>`
 }
 
+/**
+ * Recebe o valor da página e retorna o HTML do radio da paginação.
+ * 
+ * @param {number} id
+ * 
+ * @returns {string}
+ */
 function renderRadio(id) {
     return `
     <li data-id="${id}">
@@ -116,6 +145,12 @@ function renderRadio(id) {
 const pagination = {};
 const searchInput = document.querySelector('#searchChar');
 
+/**
+ * Configura a paginação e adiciona manipuladores de eventos para navegação.
+ * 
+ * @param {number} currentIndex        - Índice da página atual.
+ * @param {number} maxOptions          - Número máximo de opções de paginação.
+ */
 function setupPagination(currentIndex, maxOptions) {
     pagination.ref = document.querySelector('#pagination');
     pagination.length = null;
@@ -132,6 +167,11 @@ function setupPagination(currentIndex, maxOptions) {
     pagination.previousPage.addEventListener('click', () => previousPage());
 }
 
+/**
+ * Avança para a próxima página. Se um índice é fornecido, avança para a página especificada.
+ * 
+ * @param {number|null} [index=null]    - Índice opcional para avançar diretamente para uma página específica.
+ */
 function nextPage(index = null) {
     if (index == null) {
         index = pagination.currentIndex + 1;
@@ -140,6 +180,11 @@ function nextPage(index = null) {
     updatePage();
 }
 
+/**
+ * Retorna para a página anterior. Se um índice é fornecido, retorna para a página especificada.
+ * 
+ * @param {number|null} [index=null]    - Índice opcional para retornar diretamente para uma página específica.
+ */
 function previousPage(index = null) {
     if (index == null) {
         index = pagination.currentIndex - 1;
@@ -148,6 +193,11 @@ function previousPage(index = null) {
     updatePage();
 }
 
+/**
+ * Muda para a página especificada com base no valor fornecido.
+ * 
+ * @param {number} value                - Índice da página para a qual mudar.
+ */
 function changePage(value) {
     if (value > pagination.currentIndex) {
         nextPage(value);
@@ -160,6 +210,14 @@ function changePage(value) {
 }
 
 // Ações
+/**
+ * Atualiza a lista de personagens com base no termo de pesquisa e na página fornecidos.
+ * Realiza a atualização da URL e da visualização dos personagens.
+ * 
+ * @param {string|null} [search=null]    - O termo de busca para filtrar os personagens.
+ * @param {number|null} [page=null]      - O número da página a ser exibida.
+ * @param {boolean} [searchSubmit=false] - Indica se a atualização foi disparada por um submit de busca.
+ */
 async function updateCharacters(search = null, page = null, searchSubmit=false) {
     updateURL(search, page, searchSubmit);
     document.body.scrollIntoView();
@@ -178,6 +236,9 @@ async function updateCharacters(search = null, page = null, searchSubmit=false) 
     updatePagination();
 }
 
+/**
+ * Atualiza a paginação com base no estado atual do objeto de configurações de paginação.
+ */
 async function updatePagination() {
     pagination.navigation.innerHTML = '';
     
@@ -249,6 +310,13 @@ async function updatePagination() {
     });
 }
 
+/**
+ * Atualiza a página e a lista de personagens.
+ * 
+ * @param {string|null} [search=null]    - O termo de busca para filtrar os personagens.
+ * @param {boolean} [resetPage=false]    - Indica se o índice da página deve ser reiniciado.
+ * @param {boolean} [searchSubmit=false] - Indica se a atualização foi disparada por um submit de busca.
+ */
 async function updatePage(search=null, resetPage=false, searchSubmit=false) {
     if (resetPage) {
         pagination.currentIndex = 0;
@@ -265,6 +333,14 @@ async function updatePage(search=null, resetPage=false, searchSubmit=false) {
     }
 }
 
+/**
+ * Renderiza os parâmetros da URL para busca e paginação.
+ * 
+ * @param {number} page                 - O número da página atual.
+ * @param {string|null} [search=null]   - O termo de busca atual.
+ * 
+ * @returns {string|null}               A string de consulta URL formatada ou null se a página não for definida.
+ */
 function renderURLQueryParams(page, search = null) {
     if (!page) return null;
     if (!search) search = searchInput.value;
@@ -272,6 +348,13 @@ function renderURLQueryParams(page, search = null) {
     return `${window.location.pathname}?${search ? `search=${encodeURIComponent(search)}&` : ''}page=${encodeURIComponent(page)}`
 }
 
+/**
+ * Atualiza a URL com os parâmetros de busca e página atuais.
+ * 
+ * @param {string|null} [search=null]    - O termo de busca para atualizar a URL.
+ * @param {number|null} [page=null]      - O número da página para atualizar a URL.
+ * @param {boolean} [searchSubmit=false] - Indica se a atualização foi disparada por um submit de busca.
+ */
 async function updateURL(search = null, page = null, searchSubmit=false) {
     const searchParams = await getURLInfo();
 
@@ -285,6 +368,9 @@ async function updateURL(search = null, page = null, searchSubmit=false) {
     window.history.replaceState({ path: newURL }, '', newURL);
 }
 
+/**
+ * Define informações da API no footer da página.
+ */
 async function setAPIInfo() {
     api.episodes.get().then((result) => {
         document.querySelector('#episode-count').innerText = result.data.info.count;
@@ -306,6 +392,11 @@ async function setAPIInfo() {
     );
 }
 
+/**
+ * Obtém informações da URL atual, como página e termo de busca.
+ * 
+ * @returns {Object} Um objeto contendo informações sobre a página e o termo de busca.
+ */
 async function getURLInfo() {
     const searchParams = new URLSearchParams(window.location.search);
 
@@ -315,6 +406,9 @@ async function getURLInfo() {
     }
 }
 
+/**
+ * Define o modo de tema da página com base na preferência do usuário.
+ */
 async function setThemeMode() {
     // Verifica se o usuário prefere dark mode
     const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -324,6 +418,9 @@ async function setThemeMode() {
     }
 }
 
+/**
+ * Configura a página inicializando informações da API, tema e atualizando personagens e paginação.
+ */
 async function setupPage() {
     setAPIInfo();
     setThemeMode();
@@ -346,8 +443,8 @@ searchInput.form.addEventListener('submit', e => {
 });
 
 document.querySelector('#icon-theme').addEventListener('click', (e) => {
-    document.body.classList.toggle('dark-theme')
-    document.body.classList.toggle('light-theme')
+    document.body.classList.toggle('dark-theme');
+    document.body.classList.toggle('light-theme');
 });
 
-setupPage();
+setupPage(); // Dispara a configuração inicial da aplicação
